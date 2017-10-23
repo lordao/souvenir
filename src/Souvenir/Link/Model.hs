@@ -11,7 +11,7 @@ module Souvenir.Link.Model where
 
 import Control.Monad
 import Data.Aeson.Casing
-import Data.Aeson.Types
+import Data.Aeson.TH
 import Data.Maybe
 import Data.Time
 import Database.Persist
@@ -36,23 +36,9 @@ Addition
     deriving Eq Generic Show
 |]
 
-instance ToJSON User where
-    toJSON = genericToJSON $ aesonPrefix snakeCase
-
-instance FromJSON User where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-
-instance ToJSON Link where
-    toJSON = genericToJSON $ aesonPrefix snakeCase
-
-instance FromJSON Link where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
-
-instance ToJSON Addition where
-    toJSON = genericToJSON $ aesonPrefix snakeCase
-
-instance FromJSON Addition where
-    parseJSON = genericParseJSON $ aesonPrefix snakeCase
+$(deriveJSON defaultOptions ''User)
+$(deriveJSON defaultOptions ''Link)
+$(deriveJSON defaultOptions ''Addition)
 
 runDB = runSqlite "accounts.db"
 
