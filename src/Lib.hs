@@ -7,9 +7,10 @@ import Network.Wai.Handler.Warp
 import Servant
 
 import Souvenir.Link.API
+import Souvenir.Link.Model
 
 startApp :: IO ()
-startApp = run 8080 app
+startApp = createDB >> run 8080 app
 
 app :: Application
 app = serve api linkV1
