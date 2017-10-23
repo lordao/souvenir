@@ -54,6 +54,9 @@ getUserLinks = let getLink = get . additionLinkId . entityVal in
     runDB . mapM getLink >=>
     return . catMaybes
 
+userExists :: UserId -> IO Bool
+userExists = runDB . get >=> return . isJust
+
 userAdditions :: UserId -> IO [Entity Addition]
 userAdditions userId = runDB (selectList [AdditionUserId ==. userId] [])
 

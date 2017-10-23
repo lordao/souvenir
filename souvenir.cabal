@@ -24,6 +24,7 @@ library
                      , persistent-sqlite
                      , servant-server
                      , time
+                     , transformers
                      , wai
                      , warp
   default-language:    Haskell2010

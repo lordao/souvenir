@@ -3,6 +3,7 @@
 
 module Souvenir.Link.API where
 
+import Control.Monad.Trans.Except
 import Control.Monad.IO.Class
 import Network.Wai
 import Network.Wai.Handler.Warp
@@ -19,5 +20,17 @@ type LinkAPI =
 
 linkV1 :: Server LinkAPI
 linkV1 userId =
-    liftIO (getUserLinks userId)
-    :<|> liftIO . saveLink userId
+    getUserLinksHandler userId
+    :<|> saveLinkHandler userId
+
+throwServant = Handler . throwE
+
+userDo userId f = do
+    exists <- liftIO $ userExists userId
+    if not exists
+       then throwServant err404
+       else liftIO (f userId)
+
+getUserLinksHandler userId = userDo userId getUserLinks
+
+saveLinkHandler userId link = userDo userId (`saveLink` link)
