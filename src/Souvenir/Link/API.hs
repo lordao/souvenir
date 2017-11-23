@@ -12,7 +12,7 @@ import Servant
 import Souvenir.Link.Model as M
 
 type LinkAPI =
-    "links" :> Capture "userId" UserId :>
+    "users" :> Capture "userId" UserId :>
         ( Get '[JSON] [M.Link]
         :<|> ReqBody '[JSON] M.Link :>
             Post '[JSON] AdditionId
