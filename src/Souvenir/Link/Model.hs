@@ -19,13 +19,18 @@ import Database.Persist.TH
 import Database.Persist.Sqlite
 import GHC.Generics
 
+type URL = String
+
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User
     name String
     email String
     deriving Eq Generic Show
 Link
-    url String
+    url URL
+    title String
+    description String
+    image URL
     UniqueUrl url
     deriving Eq Generic Show
 Addition
