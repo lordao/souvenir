@@ -5,17 +5,19 @@ module Souvenir.Link.API where
 
 import Control.Monad.Trans.Except
 import Control.Monad.IO.Class
+import Data.Aeson.Types
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Servant
 
+import Souvenir.Link.Fetch
 import Souvenir.Link.Model as M
 
 type LinkAPI =
     "users" :> Capture "userId" UserId :>
         ( Get '[JSON] [M.Link]
-        :<|> ReqBody '[JSON] M.Link :>
-            Post '[JSON] AdditionId
+        :<|> ReqBody '[PlainText] M.URL :>
+            Post '[JSON] (Maybe AdditionId)
         )
 
 linkV1 :: Server LinkAPI
@@ -33,4 +35,6 @@ userDo userId f = do
 
 getUserLinksHandler userId = userDo userId getUserLinks
 
-saveLinkHandler userId link = userDo userId (`saveLink` link)
+saveLinkHandler userId url =
+    liftIO (fetchLink url) >>= \(Success link) ->
+    userDo userId (`saveLink` link)

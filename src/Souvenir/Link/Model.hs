@@ -9,6 +9,7 @@
 
 module Souvenir.Link.Model where
 
+import Control.Exception
 import Control.Monad
 import Data.Aeson.Casing
 import Data.Aeson.TH
@@ -17,6 +18,7 @@ import Data.Time
 import Database.Persist
 import Database.Persist.TH
 import Database.Persist.Sqlite
+import Database.Sqlite
 import GHC.Generics
 
 type URL = String
@@ -65,12 +67,20 @@ userExists = runDB . get >=> return . isJust
 userAdditions :: UserId -> IO [Entity Addition]
 userAdditions userId = runDB (selectList [AdditionUserId ==. userId] [])
 
-saveLink :: UserId -> Link -> IO AdditionId
-saveLink userId =
-    getLinkKey >=> \linkId ->
+constraintError :: SqliteException -> IO (Maybe a)
+constraintError sqlEx = return Nothing
+
+save :: (PersistEntityBackend record ~ SqlBackend, PersistEntity record) => record -> IO (Key record)
+save = runDB . insert
+
+saveMaybe :: (PersistEntityBackend record ~ SqlBackend, PersistEntity record) => record -> IO (Maybe (Key record))
+saveMaybe = handle constraintError . fmap Just . save
+
+saveLink :: UserId -> Link -> IO (Maybe AdditionId)
+saveLink userId link =
+    getLinkKey link >>= \linkId ->
     getCurrentTime >>=
-    save . Addition userId linkId
-    where save = runDB . insert
+    saveMaybe . Addition userId linkId
 
 getLinkKey :: Link -> IO (Key Link)
 getLinkKey link = findUrl url >>= maybe (addLink link) (return . entityKey)
